@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3">Return Details: {{ return_report.return_no }}</h1>
+            <a href="{{ url_for('returns') }}" class="btn btn-secondary">Back to Returns</a>
+        </div>
+        <div class="alert alert-info">
+            <h5>How to use this page:</h5>
+            <p>This page shows detailed information for a specific return report. View the return report summary including financial details like ERV, credits received, fees, and payment information. The return items table lists all individual items with their NDC codes, descriptions, quantities, prices, categories, and classification reasons. The manufacturer breakdown shows ERV values by manufacturer. Use the "Add Item" button to add more items to this return report.</p>
+        </div>
+
+        <!-- Return Report Details -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Return Report Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Return #:</strong> {{ return_report.return_no }}</p>
+                        <p><strong>Invoice Date:</strong> {{ return_report.invoice_date.strftime('%Y-%m-%d') }}</p>
+                        <p><strong>Service Type:</strong> {{ return_report.service_type }}</p>
+                        <p><strong>ERV:</strong> ${{ "%.2f"|format(return_report.ERV) }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Credit Received:</strong> ${{ "%.2f"|format(return_report.credit_received) }}</p>
+                        <p><strong>Fees:</strong> ${{ "%.2f"|format(return_report.fees) }}</p>
+                        <p><strong>Amount Paid:</strong> ${{ "%.2f"|format(return_report.amount_paid) }}</p>
+                        <p><strong>Last Payment Date:</strong> {{ return_report.last_payment_date.strftime('%Y-%m-%d') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Return Items -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Return Items</h5>
+                <a href="{{ url_for('add_item', return_no=return_report.return_no) }}" class="btn btn-primary btn-sm">Add Item</a>
+            </div>
+            {% if items %}
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>NDC</th>
+                                <th>Description</th>
+                                <th>Lot #</th>
+                                <th>Exp Date</th>
+                                <th>Pkg Size</th>
+                                <th>Full Qty</th>
+                                <th>Partial Qty</th>
+                                <th>Unit Price</th>
+                                <th>Extended Price</th>
+                                <th>Category</th>
+                                <th>Reason</th>
+                                <th>Manufacturer</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>{{ item.ndc }}</td>
+                                <td>{{ item.description }}</td>
+                                <td>{{ item.lot_no }}</td>
+                                <td>{{ item.exp_date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ item.pkg_size }}</td>
+                                <td>{{ item.full_qty }}</td>
+                                <td>{{ item.partial_qty }}</td>
+                                <td>${{ "%.2f"|format(item.unit_price) }}</td>
+                                <td>${{ "%.2f"|format(item.extended_price) }}</td>
+                                <td>{{ item.category.name }}</td>
+                                <td>{{ item.reason.name }}</td>
+                                <td>{{ item.manufacturer }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <div class="card-body text-center">
+                <h5 class="card-title">No Items Added</h5>
+                <p class="card-text">No return items have been added to this return yet.</p>
+                <a href="{{ url_for('add_item', return_no=return_report.return_no) }}" class="btn btn-primary">Add First Item</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Manufacturer Breakdown -->
+        {% if manufacturers %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Manufacturer Breakdown</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Manufacturer Name</th>
+                                <th>ERV</th>
+                                <th>Expiration Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for manufacturer in manufacturers %}
+                            <tr>
+                                <td>{{ manufacturer.manufacturer_name }}</td>
+                                <td>${{ "%.2f"|format(manufacturer.ERV) }}</td>
+                                <td>{{ manufacturer.expiration_date.strftime('%Y-%m-%d') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card text-center p-5">
+            <div class="card-body">
+                <h5 class="card-title">No Manufacturer Breakdown</h5>
+                <p class="card-text">No manufacturer details available for this return.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

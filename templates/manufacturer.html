@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">{{ manufacturer_name }} - Manufacturer Details</h1>
+        <div class="alert alert-info">
+            <h5>How to use this page:</h5>
+            <p>This page provides detailed information for a specific manufacturer. View total ERV and extended price summaries for all returns from this manufacturer. The accordion below shows each return report associated with this manufacturer, with expandable sections containing detailed item information including NDC codes, descriptions, quantities, prices, categories, and classification reasons. Use this to analyze manufacturer-specific return patterns and performance.</p>
+        </div>
+        <a href="{{ url_for('reports') }}" class="btn btn-secondary mb-3">← Back to Reports</a>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Total ERV</h5>
+                <h3 class="text-primary">${{ "%.2f"|format(total_erv) }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Total Extended Price</h5>
+                <h3 class="text-success">${{ "%.2f"|format(total_extended_price) }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Returns Accordion -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Return Reports & Items</h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="returnsAccordion">
+                    {% for return_no, data in returns_data.items() %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ loop.index }}">
+                            <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="{% if loop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ loop.index }}">
+                                <strong>{{ return_no }}</strong> - Invoice Date: {{ data.return_report.invoice_date.strftime('%Y-%m-%d') }} | Subtotal: ${{ "%.2f"|format(data.subtotal) }}
+                            </button>
+                        </h2>
+                        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#returnsAccordion">
+                            <div class="accordion-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>NDC</th>
+                                                <th>Description</th>
+                                                <th>Lot No</th>
+                                                <th>Exp Date</th>
+                                                <th>Pkg Size</th>
+                                                <th>Full Qty</th>
+                                                <th>Partial Qty</th>
+                                                <th>Unit Price</th>
+                                                <th>Extended Price</th>
+                                                <th>Category</th>
+                                                <th>Reason</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in data.items %}
+                                            <tr>
+                                                <td>{{ item.ndc }}</td>
+                                                <td>{{ item.description }}</td>
+                                                <td>{{ item.lot_no }}</td>
+                                                <td>{{ item.exp_date.strftime('%Y-%m-%d') }}</td>
+                                                <td>{{ item.pkg_size }}</td>
+                                                <td>{{ item.full_qty }}</td>
+                                                <td>{{ item.partial_qty }}</td>
+                                                <td>${{ "%.2f"|format(item.unit_price) }}</td>
+                                                <td>${{ "%.2f"|format(item.extended_price) }}</td>
+                                                <td>{{ item.category.name }}</td>
+                                                <td>{{ item.reason.name }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

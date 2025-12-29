@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-lg-8 col-md-10 col-sm-12">
+        <div class="card p-5 text-center">
+            <h1 class="display-4 text-primary mb-4">Welcome to Rx Returns Portal</h1>
+            <div class="alert alert-info">
+                <h5>How to use this page:</h5>
+                <p>This is the home page of the pharmaceutical returns portal. If you already have an account, click "Login" to access your dashboard and manage returns. If you're new to the system, click "Register" to create an account. The portal allows you to submit pharmaceutical returns, track their status, generate reports, and manage credits through a secure, regulated workflow.</p>
+            </div>
+            <p class="lead mb-4">
+                Securely manage your pharmaceutical inventory returns with our regulated portal.
+                Submit returns, track shipments, and receive credits efficiently.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">Login</a>
+                <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg">Register</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

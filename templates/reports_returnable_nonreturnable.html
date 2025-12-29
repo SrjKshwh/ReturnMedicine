@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Returnable / Non-Returnable Report</h1>
+        <div class="alert alert-info">
+            <h5>How to use this page:</h5>
+            <p>This page displays a detailed breakdown of returnable and non-returnable pharmaceutical items. Returnable items are those eligible for credit based on expiration dates and manufacturer policies. Non-returnable items include short-dated, outdated, or policy-restricted products. The tables show item details including return numbers, manufacturers, values, and reasons for non-returnability. Use the Export to PDF button to generate a downloadable report with this information.</p>
+        </div>
+        <div class="mb-3">
+            <a href="{{ url_for('reports_returnable_nonreturnable_pdf') }}" class="btn btn-primary">
+                <i class="fas fa-download"></i> Export to PDF
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Returnable Items Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Returnable Items</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Return No</th>
+                                <th>Manufacturer</th>
+                                <th>ERV</th>
+                                <th>Expiration Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in returnable_items %}
+                            <tr>
+                                <td>{{ item.return_report.return_no }}</td>
+                                <td>{{ item.manufacturer_name }}</td>
+                                <td>${{ "%.2f"|format(item.ERV) }}</td>
+                                <td>{{ item.expiration_date.strftime('%Y-%m-%d') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Non-Returnable Items Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Non-Returnable Items</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Return No</th>
+                                <th>NDC</th>
+                                <th>Description</th>
+                                <th>Lot No</th>
+                                <th>Exp Date</th>
+                                <th>Manufacturer</th>
+                                <th>Reason</th>
+                                <th>Extended Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in non_returnable_items %}
+                            <tr>
+                                <td>{{ item.return_report.return_no }}</td>
+                                <td>{{ item.ndc }}</td>
+                                <td>{{ item.description }}</td>
+                                <td>{{ item.lot_no }}</td>
+                                <td>{{ item.exp_date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ item.manufacturer }}</td>
+                                <td>{{ item.reason.name }}</td>
+                                <td>${{ "%.2f"|format(item.extended_price) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Totals Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Totals</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h4 class="text-success">Returnable Total</h4>
+                            <h3>${{ "%.2f"|format(returnable_total) }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h4 class="text-danger">Non-Returnable Total</h4>
+                            <h3>${{ "%.2f"|format(non_returnable_total) }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h4 class="text-primary">Grand Total</h4>
+                            <h3>${{ "%.2f"|format(grand_total) }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

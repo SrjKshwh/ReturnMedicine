@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Returns{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Manage Return Reports</h2>
+            <div class="alert alert-info">
+                <h5>How to use this page:</h5>
+                <p>This page allows administrators to manage all return reports in the system. View the list of return reports with their financial details including ERV, credits received, and service types. Use the "Edit" button to modify return report information. The "Delete" button removes the return report and all associated manufacturer breakdowns and items (use with caution). Changes to return reports will affect reporting analytics and payment tracking.</p>
+            </div>
+            <p class="text-muted">Edit and delete return reports.</p>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>Current Returns</h5>
+                </div>
+                <div class="card-body">
+                    {% if returns %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Return No</th>
+                                        <th>Invoice Date</th>
+                                        <th>Service Type</th>
+                                        <th>ERV</th>
+                                        <th>Credit Received</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for return_report in returns %}
+                                    <tr>
+                                        <td>{{ return_report.return_no }}</td>
+                                        <td>{{ return_report.invoice_date.strftime('%Y-%m-%d') if return_report.invoice_date else 'N/A' }}</td>
+                                        <td>{{ return_report.service_type }}</td>
+                                        <td>${{ "%.2f"|format(return_report.ERV) }}</td>
+                                        <td>${{ "%.2f"|format(return_report.credit_received) }}</td>
+                                        <td>
+                                            <span class="badge bg-success">Active</span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('edit_return', return_no=return_report.return_no) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                            <form method="POST" action="{{ url_for('delete_return', return_no=return_report.return_no) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this return report and all associated data?')">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No return reports found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

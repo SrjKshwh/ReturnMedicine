@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3">
+                {% if is_reviewer %}Reviewer Dashboard{% else %}Dashboard{% endif %}
+            </h1>
+            {% if not is_reviewer %}
+            <a href="{{ url_for('new_return') }}" class="btn btn-primary">New Return</a>
+            {% endif %}
+        </div>
+        <div class="alert alert-info">
+            <h5>How to use this page:</h5>
+            <p>This is your main dashboard showing an overview of your pharmaceutical returns activity. For regular users, it displays key metrics like total ERV, short-dated value, submission counts, and credited returns. You'll see top manufacturers by ERV and ERV trends over time. The submissions table shows your return submissions with their current status. For reviewers, it shows all submissions from users that need review. Use the "View" button to see submission details and the "Review" button (for reviewers) to update submission status.</p>
+        </div>
+
+        {% if not is_reviewer %}
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">${{ "%.2f"|format(total_erv) }}</h5>
+                        <p class="card-text">Total ERV</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">${{ "%.2f"|format(total_short_dated) }}</h5>
+                        <p class="card-text">Total Short Dated</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ submissions|length }}</h5>
+                        <p class="card-text">Total Submissions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ submissions|selectattr('status', 'equalto', 'Credited')|list|length }}</h5>
+                        <p class="card-text">Credited Returns</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Top 5 Manufacturers by ERV</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if top_manufacturers %}
+                        <ul class="list-group list-group-flush">
+                            {% for manufacturer in top_manufacturers %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ manufacturer.manufacturer_name }}
+                                <span class="badge bg-primary rounded-pill">${{ "%.2f"|format(manufacturer.total_erv) }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="text-muted">No manufacturer data available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">ERV Trend vs Month</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="ervTrendChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if submissions %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Your Submissions</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Submission ID</th>
+                                {% if is_reviewer %}<th>Company</th>{% endif %}
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Items</th>
+                                <th>Tracking</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for submission in submissions %}
+                            <tr>
+                                <td>{{ submission.submission_uuid }}</td>
+                                {% if is_reviewer %}<td>{{ submission.submitter.company_name }}</td>{% endif %}
+                                <td>{{ submission.submission_date.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    <span class="badge
+                                        {% if submission.status == 'Draft' %}bg-secondary
+                                        {% elif submission.status == 'Submitted' %}bg-warning
+                                        {% elif submission.status == 'Received' %}bg-info
+                                        {% elif submission.status == 'Credited' %}bg-success
+                                        {% else %}bg-light text-dark{% endif %}">
+                                        {{ submission.status }}
+                                    </span>
+                                </td>
+                                <td>{{ submission.items|length }}</td>
+                                <td>
+                                    {% if submission.tracking_number %}
+                                        {{ submission.tracking_number }}
+                                    {% else %}
+                                        <em>Not assigned</em>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('view_submission', submission_uuid=submission.submission_uuid) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                    {% if is_reviewer and submission.status == 'Submitted' %}
+                                    <a href="{{ url_for('review_submission', submission_uuid=submission.submission_uuid) }}" class="btn btn-sm btn-outline-success ms-1">Review</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card text-center p-5">
+            <div class="card-body">
+                {% if is_reviewer %}
+                <h5 class="card-title">No Submissions to Review</h5>
+                <p class="card-text">There are currently no submissions awaiting review.</p>
+                {% else %}
+                <h5 class="card-title">No Submissions Yet</h5>
+                <p class="card-text">Start by creating your first return submission.</p>
+                <a href="{{ url_for('new_submission') }}" class="btn btn-primary">Create New Submission</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('ervTrendChart');
+    if (ctx) {
+        const chartCtx = ctx.getContext('2d');
+        const ervTrendData = {{ erv_trend|tojson|safe }};
+
+        const labels = ervTrendData.map(function(item) { return item.month; });
+        const data = ervTrendData.map(function(item) { return item.total_erv; });
+
+        new Chart(chartCtx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'ERV Trend',
+                    data: data,
+                    borderColor: '#00aaff',
+                    backgroundColor: 'rgba(0, 170, 255, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

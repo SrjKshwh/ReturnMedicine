@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Add Item to Return {{ return_report.return_no }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Add Item to Return {{ return_report.return_no }}</h2>
+    <div class="alert alert-info">
+        <h5>How to use this page:</h5>
+        <p>This page allows you to add items to an existing return report. You can either add items manually by filling out the form fields (manufacturer, NDC, description, lot number, expiration date, package size, quantities, prices, and category), or use bulk upload options. For CSV upload, provide a file with the required columns and the system will process multiple items at once. For PDF upload, the system will parse tabular data from the PDF and convert it to CSV for review. Items will be automatically classified based on expiration dates and NDC rules, and added to the return report for tracking and reporting.</p>
+    </div>
+
+    <!-- Bulk Upload Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Bulk Upload Options</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Upload CSV File</h6>
+                    <form method="POST" action="{{ url_for('bulk_upload', return_no=return_report.return_no) }}" enctype="multipart/form-data">
+                        {{ bulk_form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ bulk_form.csv_file.label(class="form-label") }}
+                            {{ bulk_form.csv_file(class="form-control") }}
+                            {% if bulk_form.csv_file.errors %}
+                                <div class="text-danger">
+                                    {% for error in bulk_form.csv_file.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <p class="text-muted small">
+                            CSV should have columns: ndc, description, lot_no, exp_date, pkg_size, full_qty, partial_qty, unit_price, extended_price, category, manufacturer<br>
+                            Date format: YYYY-MM-DD<br>
+                            <strong>Note:</strong> Reason will be auto-classified based on expiration date and NDC rules.
+                        </p>
+                        {{ bulk_form.submit(class="btn btn-success") }}
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <h6>Upload PDF File (Parse to CSV)</h6>
+                    <form method="POST" action="{{ url_for('pdf_upload', return_no=return_report.return_no) }}" enctype="multipart/form-data">
+                        {{ pdf_form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ pdf_form.pdf_file.label(class="form-label") }}
+                            {{ pdf_form.pdf_file(class="form-control") }}
+                            {% if pdf_form.pdf_file.errors %}
+                                <div class="text-danger">
+                                    {% for error in pdf_form.pdf_file.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <p class="text-muted small">
+                            Upload a PDF file to extract tabular data and convert to CSV for review.
+                        </p>
+                        {{ pdf_form.submit(class="btn btn-info") }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Or Add Single Item Manually</h3>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.manufacturer.label(class="form-label") }}
+                    {{ form.manufacturer(class="form-control") }}
+                    {% if form.manufacturer.errors %}
+                        <div class="text-danger">
+                            {% for error in form.manufacturer.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.ndc.label(class="form-label") }}
+                    {{ form.ndc(class="form-control") }}
+                    {% if form.ndc.errors %}
+                        <div class="text-danger">
+                            {% for error in form.ndc.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            {{ form.description.label(class="form-label") }}
+            {{ form.description(class="form-control") }}
+            {% if form.description.errors %}
+                <div class="text-danger">
+                    {% for error in form.description.errors %}
+                        <small>{{ error }}</small>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.lot_no.label(class="form-label") }}
+                    {{ form.lot_no(class="form-control") }}
+                    {% if form.lot_no.errors %}
+                        <div class="text-danger">
+                            {% for error in form.lot_no.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.exp_date.label(class="form-label") }}
+                    {{ form.exp_date(class="form-control") }}
+                    {% if form.exp_date.errors %}
+                        <div class="text-danger">
+                            {% for error in form.exp_date.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    {{ form.pkg_size.label(class="form-label") }}
+                    {{ form.pkg_size(class="form-control") }}
+                    {% if form.pkg_size.errors %}
+                        <div class="text-danger">
+                            {% for error in form.pkg_size.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    {{ form.full_qty.label(class="form-label") }}
+                    {{ form.full_qty(class="form-control") }}
+                    {% if form.full_qty.errors %}
+                        <div class="text-danger">
+                            {% for error in form.full_qty.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    {{ form.partial_qty.label(class="form-label") }}
+                    {{ form.partial_qty(class="form-control") }}
+                    {% if form.partial_qty.errors %}
+                        <div class="text-danger">
+                            {% for error in form.partial_qty.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.unit_price.label(class="form-label") }}
+                    {{ form.unit_price(class="form-control") }}
+                    {% if form.unit_price.errors %}
+                        <div class="text-danger">
+                            {% for error in form.unit_price.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.extended_price.label(class="form-label") }}
+                    {{ form.extended_price(class="form-control") }}
+                    {% if form.extended_price.errors %}
+                        <div class="text-danger">
+                            {% for error in form.extended_price.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.category.label(class="form-label") }}
+                    {{ form.category(class="form-control") }}
+                    {% if form.category.errors %}
+                        <div class="text-danger">
+                            {% for error in form.category.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="alert alert-info">
+                    <strong>Auto-Classification:</strong> Reason will be automatically determined based on expiration date and NDC rules when you submit this item.
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ url_for('return_details', return_no=return_report.return_no) }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

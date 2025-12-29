@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">New Return Submission</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h5>How to use this page:</h5>
+                    <p>This page allows you to create a new return submission by adding pharmaceutical items for return processing. Enter the NDC code, quantity, and expiration date for each item. You can add multiple items using the "Add Another Item" button. The system will automatically classify each item as returnable, short-dated, outdated, or non-returnable based on expiration rules and manufacturer policies, and calculate estimated credits. After submission, you'll be able to review the details, download PDF manifests and shipping labels, and track the submission status through the approval workflow.</p>
+                </div>
+                <form method="POST" id="submissionForm">
+                    <div id="itemsContainer">
+                        <div class="item-row mb-3 p-3 border rounded">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="form-label">NDC Code</label>
+                                    <input type="text" class="form-control" name="ndc[]" placeholder="e.g., 0002-1234-01" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Quantity</label>
+                                    <input type="number" class="form-control" name="qty[]" min="1" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Expiration Date</label>
+                                    <input type="date" class="form-control" name="exp[]" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Estimated Credit</label>
+                                    <input type="text" class="form-control" readonly placeholder="Calculated automatically">
+                                </div>
+                                <div class="col-md-1 d-flex align-items-end">
+                                    <button type="button" class="btn btn-outline-danger remove-item" style="display: none;">×</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button type="button" class="btn btn-outline-secondary" id="addItem">Add Another Item</button>
+                        <button type="submit" class="btn btn-primary">Create Submission</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const itemsContainer = document.getElementById('itemsContainer');
+    const addItemBtn = document.getElementById('addItem');
+    let itemCount = 1;
+
+    addItemBtn.addEventListener('click', function() {
+        itemCount++;
+        const newItemRow = document.querySelector('.item-row').cloneNode(true);
+        newItemRow.querySelectorAll('input').forEach(input => {
+            input.value = '';
+            if (input.name) {
+                input.name = input.name.replace(/\[\]$/, '[]');
+            }
+        });
+        newItemRow.querySelector('.remove-item').style.display = 'block';
+        itemsContainer.appendChild(newItemRow);
+        updateRemoveButtons();
+    });
+
+    function updateRemoveButtons() {
+        const removeButtons = document.querySelectorAll('.remove-item');
+        removeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                if (itemCount > 1) {
+                    this.closest('.item-row').remove();
+                    itemCount--;
+                    updateRemoveButtons();
+                }
+            });
+        });
+    }
+
+    updateRemoveButtons();
+});
+</script>
+{% endblock %}
+{% endblock %}

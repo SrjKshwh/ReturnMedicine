@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Returns Reports</h1>
+        <div class="alert alert-info">
+            <h5>How to use this page:</h5>
+            <p>This page provides comprehensive analytics and reports on pharmaceutical returns. View summary metrics including total ERV, credits, fees, and classification breakdowns (short dated, outdated, non-returnable). The charts show manufacturer ERV percentages and returnable vs non-returnable item counts. Tables display breakdowns by category and manufacturer with detailed financial information. Click on manufacturer names to view detailed manufacturer-specific reports.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Total ERV</h5>
+                <h3 class="text-primary">${{ "%.2f"|format(total_erv) }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Short Dated Value</h5>
+                <h3 class="text-info">${{ "%.2f"|format(short_dated_value) }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Outdated Value</h5>
+                <h3 class="text-danger">${{ "%.2f"|format(outdated_value) }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Non-Returnable Value</h5>
+                <h3 class="text-secondary">${{ "%.2f"|format(non_returnable_value) }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Total Credits</h5>
+                <h3 class="text-success">${{ "%.2f"|format(total_credits) }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Total Fees</h5>
+                <h3 class="text-warning">${{ "%.2f"|format(total_fees) }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>ERV % by Manufacturer</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="manufacturerPieChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Returnable vs Non-Returnable Count</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="returnableBarChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Breakdown Table -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Totals by Category</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Total Value</th>
+                                <th>Item Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in category_data %}
+                            <tr>
+                                <td>{{ category.name }}</td>
+                                <td>${{ "%.2f"|format(category.total_value) }}</td>
+                                <td>{{ category.item_count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Manufacturer Breakdown Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Totals by Manufacturer</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Manufacturer</th>
+                                <th>Total ERV</th>
+                                <th>Percentage</th>
+                                <th>Number of Returns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for manufacturer in manufacturer_data %}
+                            <tr>
+                                <td><a href="{{ url_for('manufacturer_details', name=manufacturer.manufacturer_name) }}">{{ manufacturer.manufacturer_name }}</a></td>
+                                <td>${{ "%.2f"|format(manufacturer.total_erv) }}</td>
+                                <td>{{ "%.1f"|format(manufacturer.percentage) }}%</td>
+                                <td>{{ manufacturer.return_count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Pie Chart for ERV % by Manufacturer
+    const manufacturerLabels = {{ manufacturer_labels | tojson }};
+    const manufacturerData = {{ manufacturer_percentages | tojson }};
+    const manufacturerColors = {{ manufacturer_colors | tojson }};
+
+    const ctxPie = document.getElementById('manufacturerPieChart').getContext('2d');
+    new Chart(ctxPie, {
+        type: 'pie',
+        data: {
+            labels: manufacturerLabels,
+            datasets: [{
+                data: manufacturerData,
+                backgroundColor: manufacturerColors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+
+    // Bar Chart for Returnable vs Non-Returnable
+    const returnableLabels = ['Returnable', 'Non-Returnable'];
+    const returnableData = [{{ returnable_count }}, {{ non_returnable_count }}];
+
+    const ctxBar = document.getElementById('returnableBarChart').getContext('2d');
+    new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: returnableLabels,
+            datasets: [{
+                label: 'Count',
+                data: returnableData,
+                backgroundColor: ['#28a745', '#dc3545'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-lg-8 col-md-10 col-sm-12">
+        <div class="card p-4">
+            <h1 class="card-title text-center text-primary mb-4">New Return Report</h1>
+            <div class="alert alert-info">
+                <h5>How to use this page:</h5>
+                <p>This page allows you to create a new return report with aggregated financial data and manufacturer breakdowns. Enter the invoice date, service type, ERV (Estimated Recovery Value), credits received, fees, amount paid, and last payment date. Add manufacturer breakdowns by specifying manufacturer name, ERV value, and expiration date for each manufacturer. You can add multiple manufacturers using the "Add Manufacturer" button. The report will be saved and can be used for generating return acknowledgment letters and tracking payment information.</p>
+            </div>
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        {{ form.invoice_date.label(class="form-label") }}
+                        {{ form.invoice_date(class="form-control") }}
+                        {% if form.invoice_date.errors %}
+                            <div class="text-danger">
+                                {% for error in form.invoice_date.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    {{ form.service_type.label(class="form-label") }}
+                    {{ form.service_type(class="form-control") }}
+                    {% if form.service_type.errors %}
+                        <div class="text-danger">
+                            {% for error in form.service_type.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form.ERV.label(class="form-label") }}
+                        {{ form.ERV(class="form-control") }}
+                        {% if form.ERV.errors %}
+                            <div class="text-danger">
+                                {% for error in form.ERV.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.credit_received.label(class="form-label") }}
+                        {{ form.credit_received(class="form-control") }}
+                        {% if form.credit_received.errors %}
+                            <div class="text-danger">
+                                {% for error in form.credit_received.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form.fees.label(class="form-label") }}
+                        {{ form.fees(class="form-control") }}
+                        {% if form.fees.errors %}
+                            <div class="text-danger">
+                                {% for error in form.fees.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.amount_paid.label(class="form-label") }}
+                        {{ form.amount_paid(class="form-control") }}
+                        {% if form.amount_paid.errors %}
+                            <div class="text-danger">
+                                {% for error in form.amount_paid.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    {{ form.last_payment_date.label(class="form-label") }}
+                    {{ form.last_payment_date(class="form-control") }}
+                    {% if form.last_payment_date.errors %}
+                        <div class="text-danger">
+                            {% for error in form.last_payment_date.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Manufacturer Breakdown Section -->
+                <div class="mb-4">
+                    <h4 class="text-primary mb-3">Manufacturer Breakdown</h4>
+                    <div id="manufacturer-container">
+                        <!-- Dynamic manufacturer rows will be added here -->
+                    </div>
+                    <button type="button" class="btn btn-secondary" id="add-manufacturer">Add Manufacturer</button>
+                </div>
+
+                {{ form.submit(class="btn btn-primary w-100 mt-3") }}
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let manufacturerIndex = 0;
+
+    function addManufacturerRow() {
+        const container = document.getElementById('manufacturer-container');
+        const row = document.createElement('div');
+        row.className = 'manufacturer-row border p-3 mb-3 rounded';
+        row.innerHTML = `
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Manufacturer Name</label>
+                    <input type="text" class="form-control" name="manufacturers-${manufacturerIndex}-manufacturer_name" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">ERV</label>
+                    <input type="number" step="0.01" class="form-control" name="manufacturers-${manufacturerIndex}-ERV" required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Expiration Date</label>
+                    <input type="date" class="form-control" name="manufacturers-${manufacturerIndex}-expiration_date" required>
+                </div>
+                <div class="col-md-1 mb-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger remove-manufacturer">Remove</button>
+                </div>
+            </div>
+        `;
+        container.appendChild(row);
+        manufacturerIndex++;
+    }
+
+    document.getElementById('add-manufacturer').addEventListener('click', addManufacturerRow);
+
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-manufacturer')) {
+            e.target.closest('.manufacturer-row').remove();
+        }
+    });
+
+    // Add one initial row
+    addManufacturerRow();
+});
+</script>
+{% endblock %}

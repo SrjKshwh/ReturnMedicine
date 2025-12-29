@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Add Reason{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Add New Reason</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5>How to use this page:</h5>
+                        <p>This page allows administrators to add new classification reasons for item categorization. Enter a unique reason name (such as "Short Dated" or "Returnable") and provide a detailed description of when this reason should be applied. These reasons are used by the system to automatically classify items based on expiration dates and manufacturer policies. New reasons will be available for use in item classification and reporting.</p>
+                    </div>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Reason Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                            <div class="form-text">The classification category name (e.g., "Short Dated", "Returnable")</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                            <div class="form-text">Detailed description of when this reason applies</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Add Reason</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="mt-3">
+                <a href="{{ url_for('admin_reasons') }}" class="btn btn-secondary">Back to Reasons</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

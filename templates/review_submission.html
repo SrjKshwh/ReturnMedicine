@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Review Submission {{ submission.submission_uuid }}</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h5>How to use this page:</h5>
+                    <p>This page allows reviewers to examine and update the status of submitted returns. Review the submission details, company information, and item list with their returnable status and estimated credits. The status history shows previous updates. If the submission is in "Submitted" status, you can update it to "Received" or "Credited" and add review notes. This action will move the submission through the approval workflow and notify the submitter of the status change.</p>
+                </div>
+                <!-- Submission Details -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5>Submission Information</h5>
+                        <p><strong>Submission ID:</strong> {{ submission.submission_uuid }}</p>
+                        <p><strong>Date:</strong> {{ submission.submission_date.strftime('%Y-%m-%d') }}</p>
+                        <p><strong>Company:</strong> {{ submission.submitter.company_name }}</p>
+                        <p><strong>Current Status:</strong>
+                            <span class="badge
+                                {% if submission.status == 'Draft' %}bg-secondary
+                                {% elif submission.status == 'Submitted' %}bg-warning
+                                {% elif submission.status == 'Received' %}bg-info
+                                {% elif submission.status == 'Credited' %}bg-success
+                                {% else %}bg-light text-dark{% endif %}">
+                                {{ submission.status }}
+                            </span>
+                        </p>
+                        {% if submission.tracking_number %}
+                        <p><strong>Tracking Number:</strong> {{ submission.tracking_number }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Summary</h5>
+                        <p><strong>Total Items:</strong> {{ submission.items|length }}</p>
+                        <p><strong>Total Estimated Credit:</strong> ${{ "%.2f"|format(total_credit) }}</p>
+                    </div>
+                </div>
+
+                <!-- Items Table -->
+                <h5>Return Items</h5>
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>NDC</th>
+                                <th>Quantity</th>
+                                <th>Expiration Date</th>
+                                <th>Returnable Status</th>
+                                <th>Estimated Credit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in submission.items %}
+                            <tr>
+                                <td>{{ item.ndc }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.expiration_date.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    <span class="badge
+                                        {% if 'Eligible' in item.returnable_status %}bg-success
+                                        {% elif 'Ineligible' in item.returnable_status %}bg-danger
+                                        {% else %}bg-warning{% endif %}">
+                                        {{ item.returnable_status }}
+                                    </span>
+                                </td>
+                                <td>${{ "%.2f"|format(item.estimated_credit) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Status History -->
+                {% if submission.status_history %}
+                <h5>Status History</h5>
+                <div class="table-responsive mb-4">
+                    <table class="table table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Updated By</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for history in submission.status_history %}
+                            <tr>
+                                <td>{{ history.updated_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ history.new_status }}</td>
+                                <td>{{ history.updated_by }}</td>
+                                <td>{{ history.notes or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                <!-- Review Form -->
+                {% if submission.status == 'Submitted' %}
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">Review Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST">
+                            <div class="mb-3">
+                                <label for="status" class="form-label">Update Status</label>
+                                <select class="form-select" id="status" name="status" required>
+                                    <option value="">Select new status...</option>
+                                    <option value="Received">Mark as Received</option>
+                                    <option value="Credited">Mark as Credited</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">Review Notes (Optional)</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Add any comments or notes about this review..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success">Update Status</button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary ms-2">Cancel</a>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    This submission has already been reviewed and is in status: <strong>{{ submission.status }}</strong>
+                </div>
+                {% endif %}
+
+                <div class="mt-3">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">Back to Dashboard</a>
+                    <a href="{{ url_for('view_submission', submission_uuid=submission.submission_uuid) }}" class="btn btn-outline-secondary ms-2">View Full Details</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

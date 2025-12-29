@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Reason{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Edit Reason</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5>How to use this page:</h5>
+                        <p>This page allows administrators to edit existing classification reasons. Modify the reason name and description as needed. Changes will affect how items are classified in the system. Be careful when editing reasons that are already in use, as this may impact existing item classifications and reports. The updated reason will be immediately available for new item classifications.</p>
+                    </div>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Reason Name</label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ reason.name }}" required>
+                            <div class="form-text">The classification category name (e.g., "Short Dated", "Returnable")</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required>{{ reason.description }}</textarea>
+                            <div class="form-text">Detailed description of when this reason applies</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Update Reason</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="mt-3">
+                <a href="{{ url_for('admin_reasons') }}" class="btn btn-secondary">Back to Reasons</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

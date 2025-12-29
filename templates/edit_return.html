@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Return Report{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Edit Return Report: {{ return_report.return_no }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5>How to use this page:</h5>
+                        <p>This page allows administrators to edit existing return reports. Modify the invoice date, service type, ERV (Estimated Recovery Value), credits received, fees, amount paid, and last payment date as needed. Changes will update the return report data and may affect associated manufacturer breakdowns and reporting analytics. Ensure all financial values are accurate as they impact payment tracking and return analytics.</p>
+                    </div>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="invoice_date" class="form-label">Invoice Date</label>
+                            <input type="date" class="form-control" id="invoice_date" name="invoice_date" value="{{ return_report.invoice_date.strftime('%Y-%m-%d') if return_report.invoice_date else '' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="service_type" class="form-label">Service Type</label>
+                            <input type="text" class="form-control" id="service_type" name="service_type" value="{{ return_report.service_type }}" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="ERV" class="form-label">ERV</label>
+                                <input type="number" step="0.01" class="form-control" id="ERV" name="ERV" value="{{ return_report.ERV }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="credit_received" class="form-label">Credit Received</label>
+                                <input type="number" step="0.01" class="form-control" id="credit_received" name="credit_received" value="{{ return_report.credit_received }}" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fees" class="form-label">Fees</label>
+                                <input type="number" step="0.01" class="form-control" id="fees" name="fees" value="{{ return_report.fees }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="amount_paid" class="form-label">Amount Paid</label>
+                                <input type="number" step="0.01" class="form-control" id="amount_paid" name="amount_paid" value="{{ return_report.amount_paid }}" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="last_payment_date" class="form-label">Last Payment Date</label>
+                            <input type="date" class="form-control" id="last_payment_date" name="last_payment_date" value="{{ return_report.last_payment_date.strftime('%Y-%m-%d') if return_report.last_payment_date else '' }}" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Update Return Report</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="mt-3">
+                <a href="{{ url_for('admin_returns') }}" class="btn btn-secondary">Back to Returns</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

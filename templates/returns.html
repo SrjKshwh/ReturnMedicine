@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3">Returns</h1>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+        <div class="alert alert-info">
+            <h5>How to use this page:</h5>
+            <p>This page displays a list of all return reports in the system. Use the search and filter options to find specific returns by return number, date range, or service type. The table shows key financial information for each return including ERV, credits received, fees, and payment details. Click "View Details" to see manufacturer breakdowns and item-level information for a specific return report.</p>
+        </div>
+
+        <!-- Search Filters -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Search & Filter Returns</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="return_no" class="form-label">Return #</label>
+                        <input type="text" class="form-control" id="return_no" name="return_no" value="{{ return_no }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="service_type" class="form-label">Service Type</label>
+                        <input type="text" class="form-control" id="service_type" name="service_type" value="{{ service_type }}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">Search</button>
+                        <a href="{{ url_for('returns') }}" class="btn btn-outline-secondary">Clear</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if returns %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Return Reports ({{ returns|length }})</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Return #</th>
+                                <th>Invoice Date</th>
+                                <th>Service Type</th>
+                                <th>ERV</th>
+                                <th>Credit Received</th>
+                                <th>Fees</th>
+                                <th>Amount Paid</th>
+                                <th>Last Payment Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for return_report in returns %}
+                            <tr>
+                                <td>{{ return_report.return_no }}</td>
+                                <td>{{ return_report.invoice_date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ return_report.service_type }}</td>
+                                <td>${{ "%.2f"|format(return_report.ERV) }}</td>
+                                <td>${{ "%.2f"|format(return_report.credit_received) }}</td>
+                                <td>${{ "%.2f"|format(return_report.fees) }}</td>
+                                <td>${{ "%.2f"|format(return_report.amount_paid) }}</td>
+                                <td>{{ return_report.last_payment_date.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    <a href="{{ url_for('return_details', return_no=return_report.return_no) }}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card text-center p-5">
+            <div class="card-body">
+                <h5 class="card-title">No Returns Found</h5>
+                <p class="card-text">No return reports match your search criteria.</p>
+                <a href="{{ url_for('returns') }}" class="btn btn-primary">Clear Filters</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
