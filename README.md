@@ -278,7 +278,6 @@ Use the following sample data to test all implementations of the returnMedicine 
 ### Default Test Users
 - **Regular User**: username: `user1`, password: `pass123`
 - **Reviewer**: username: `reviewer1`, password: `review123`
-- **Admin**: username: `admin`, password: `admin123`
 
 ### Sample NDCs for Testing
 | NDC | Drug Name | Manufacturer | Policy | Base Credit |
